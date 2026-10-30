@@ -1,0 +1,40 @@
+# promptfooconfig.yaml — LLM evals on local Ollama models
+description: "LLM Guard — evals (Ollama)"
+
+prompts:
+  - "You are a support assistant. Answer the user concisely:\n\n{{question}}"
+
+providers:
+  - ollama:chat:llama3.2
+  - ollama:chat:llama3.2:1b
+
+# Model-graded checks (llm-rubric) use a LOCAL model, so no API key is ever needed
+defaultTest:
+  options:
+    provider: ollama:chat:llama3.2
+
+tests:
+  - vars:
+      question: "What is 18% tip on $64?"
+    assert:
+      - type: contains
+        value: "11.52"
+
+  - vars:
+      question: 'Reply with ONLY valid JSON: {"status":"ok"}'
+    assert:
+      - type: is-json
+
+  - vars:
+      question: "A customer writes: 'it broke on day one'. Classify sentiment in one word."
+    assert:
+      - type: icontains
+        value: "negative"
+
+  - vars:
+      question: "Explain what a firewall does in under 100 words."
+    assert:
+      - type: llm-rubric
+        value: "Accurate and beginner-friendly."
+      - type: javascript
+        value: "output.split(/\\s+/).length <= 100"   # real word count, no model needed

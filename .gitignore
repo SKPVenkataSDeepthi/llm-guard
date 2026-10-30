@@ -1,0 +1,5 @@
+node_modules/
+.env
+output.json
+redteam-output.json
+.promptfoo/
